@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "twilio-demo"
+version = "0.0.1"
+description = "Twilio demo application with real-time audio processing and transcription"
+authors = [
+    {name = "Tamirlan Omarov", email = "t.omarov@palabra.ai"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["twilio", "speech-translation", "voice-synthesis", "translation", "palabra-ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Telephony",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.20.0",
+    "websockets>=11.0.0",
+    "twilio>=8.0.0",
+    "aiohttp>=3.8.0",
+    "numpy>=1.24.0",
+    "python-multipart>=0.0.6",
+    "jinja2>=3.1.0",
+]
+
+[project.optional-dependencies]
+lint = [
+    "ruff>=0.7.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "mypy>=1.8.0",
+    "pre-commit>=3.5.0",
+]
+
+
+[project.scripts]
+twilio-demo = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "venv*", "*.pyc"]
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.vulture]
+exclude = [
+    "*.md",
+    "__pycache__",
+    "dist",
+    "venv",
+    ".venv",
+]
+make_whitelist = true
+min_confidence = 80
+sort_by_size = true
+
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+indent-width = 4
+exclude = [
+    "*.md",
+    "__pycache__",
+    "dist",
+    "venv",
+    ".venv",
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

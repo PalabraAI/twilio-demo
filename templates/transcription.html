@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Transcription - Palabra AI</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Live Transcription</h1>
+            <p>Real-time conversation transcription powered by Palabra AI</p>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="connection-status">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="transcription-container">
+            <div class="transcription-header">
+                <h2>Conversation History</h2>
+                <p>Live updates as participants speak</p>
+            </div>
+            <div class="messages-container" id="messages-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎧</div>
+                    <p>Waiting for conversation to begin...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+
