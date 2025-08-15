@@ -178,6 +178,14 @@ The web interface provides:
 - **Connection Status**: WebSocket connection monitoring
 - **Responsive Design**: Works on desktop and mobile devices
 
+## 📸 Screenshots
+
+### Main Interface
+![Main Interface](/static/readme/screen_1.png)
+
+### Transcription Display
+![Transcription Display](/static/readme/screen_2.png)
+
 ## 🔒 Security
 
 - **Twilio Signature Validation**: All webhooks are verified
