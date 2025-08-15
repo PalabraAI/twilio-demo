@@ -207,6 +207,21 @@ body {
     color: var(--text-secondary);
 }
 
+.message.validated .message-content {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.message.complete .message-content {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.message.complete .text-block:last-child .text-content {
+    color: var(--accent);
+    font-weight: 600;
+}
+
 .language-indicator {
     display: inline-flex;
     align-items: center;

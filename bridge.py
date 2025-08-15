@@ -40,11 +40,6 @@ class AudioBridge:
         self.translated_audio_queue = asyncio.Queue()
         self.block_size = 960  # in bytes for pcm_s16le 24 khz with 20 ms
 
-        # Transcription and translation state
-        self.last_original_transcription = ''
-        self.last_language = ''
-        self.last_translated_transcription = ''
-
     async def _create_palabra_session(self) -> dict:
         url = 'https://api.palabra.ai/session-storage/session'
         payload = {'data': {'subscriber_count': 0, 'publisher_can_subscribe': True}}
@@ -185,31 +180,13 @@ class AudioBridge:
                     transcription = data.get('data', {}).get('transcription', {})
                     text = transcription.get('text', '')
                     lang = transcription.get('language', '')
+                    transcription_id = transcription.get('transcription_id')
 
-                    if text:
+                    if text and transcription_id:
                         if msg_type == 'translated_transcription':
-                            # Replace content with original and translation
-                            await broadcast_transcription(
-                                self.role, self.last_original_transcription, text, self.last_language, 'replace'
-                            )
-                            self.last_original_transcription = ''
-                            self.last_language = ''
-
-                        elif msg_type == 'partial_transcription':
-                            if not self.last_original_transcription:
-                                action = 'new'
-                            else:
-                                action = 'update'
-
-                            self.last_original_transcription = text
-                            self.last_language = lang
-                            await broadcast_transcription(self.role, text, '', lang, action)
-
-                        elif msg_type == 'validated_transcription':
-                            # Update current div
-                            self.last_original_transcription = text
-                            self.last_language = lang
-                            await broadcast_transcription(self.role, text, '', lang, 'update')
+                            await broadcast_transcription(self.role, '', text, lang, 'update', transcription_id)
+                        else:
+                            await broadcast_transcription(self.role, text, '', lang, 'update', transcription_id)
             except websockets.exceptions.ConnectionClosed:
                 logger.info('WebSocket connection closed')
                 break

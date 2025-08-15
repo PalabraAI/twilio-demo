@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 transcription_websockets: set[WebSocket] = set()
 
 
-async def broadcast_transcription(role: str, original_text: str, translated_text: str, lang: str, action: str):
+async def broadcast_transcription(
+    role: str, original_text: str, translated_text: str, lang: str, action: str, transcription_id: str
+):
     """Sends the transcription to all connected web clients."""
     message = {
         'type': 'transcription',
@@ -17,7 +19,8 @@ async def broadcast_transcription(role: str, original_text: str, translated_text
         'original_text': original_text,
         'translated_text': translated_text,
         'original_language': lang,
-        'action': action,  # One of "update", "replace", "new"
+        'action': action,
+        'transcription_id': transcription_id,
         'timestamp': asyncio.get_event_loop().time(),
     }
 

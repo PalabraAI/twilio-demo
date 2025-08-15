@@ -3,11 +3,8 @@ const ws = new WebSocket(`wss://${window.location.host}/transcription-ws`);
 const statusElement = document.getElementById('connection-status');
 const container = document.getElementById('messages-container');
 
-// Storage for partial transcriptions of each participant
-const partialMessages = {
-    client: null,
-    operator: null
-};
+// Storage for transcriptions by transcription_id
+const transcriptionMessages = new Map();
 
 // WebSocket event handlers
 ws.onopen = function() {
@@ -34,60 +31,72 @@ ws.onmessage = function(event) {
 
 // Main transcription handling function
 function handleTranscription(data) {
-    switch (data.action) {
-        case "new":
-            createNewDiv(data);
-            break;
-        case "update":
-            updateExistingDiv(data);
-            break;
-        case "replace":
-            replaceWithComplete(data);
-            break;
-        default:
-            console.error("Unknown action:", data.action);
-    }
+    console.log('Handling transcription:', {
+        action: data.action,
+        id: data.transcription_id,
+        role: data.role,
+        original: data.original_text,
+        translated: data.translated_text,
+        lang: data.original_language
+    });
+    
+    // Единственное действие - update (создать или обновить)
+    updateOrCreateDiv(data);
+    
+    // Clean up old transcriptions
+    cleanupOldTranscriptions();
+    
     container.scrollTop = container.scrollHeight;
 }
 
-// Create new transcription div
-function createNewDiv(data) {
-    const messageDiv = createMessageElement(data, true);
-    partialMessages[data.role] = messageDiv;
-    container.appendChild(messageDiv);
-}
-
-// Replace existing div with complete transcription
-function replaceWithComplete(data) {
-    const div = partialMessages[data.role];
-    if (div) {
-        const originalText = div.querySelector('.text-block:first-child .text-content');
-        const translatedText = div.querySelector('.text-block:last-child .text-content');
+// Universal function to create or update transcription div
+function updateOrCreateDiv(data) {
+    let div = transcriptionMessages.get(data.transcription_id);
+    
+    if (!div) {
+        // Создаем новый div
+        div = createMessageElement(data);
+        transcriptionMessages.set(data.transcription_id, div);
+        container.appendChild(div);
+        console.log('Created new div for transcription ID:', data.transcription_id);
+    } else {
+        // Обновляем существующий div
+        if (data.original_text) {
+            // Обновляем оригинальный текст
+            const originalText = div.querySelector('.text-block:first-child .text-content');
+            originalText.textContent = data.original_text;
+            console.log('Updated original text for transcription ID:', data.transcription_id);
+        }
         
-        originalText.textContent = data.original_text;
-        translatedText.textContent = data.translated_text;
-        div.classList.remove('partial');
-        partialMessages[data.role] = null;
+        if (data.translated_text) {
+            // Обновляем переведенный текст
+            const translatedText = div.querySelector('.text-block:last-child .text-content');
+            translatedText.textContent = data.translated_text;
+            div.classList.remove('partial');
+            div.classList.add('complete');
+            console.log('Updated translation for transcription ID:', data.transcription_id);
+        }
     }
 }
 
-// Update existing div
-function updateExistingDiv(data) {
-    const partialDiv = partialMessages[data.role];
-    if (partialDiv) {
-        const originalText = partialDiv.querySelector('.text-block:first-child .text-content');
-        originalText.textContent = data.original_text;
+// Clean up old transcriptions to prevent memory leaks
+function cleanupOldTranscriptions() {
+    const maxTranscriptions = 50; // Keep only last 50 transcriptions
+    if (transcriptionMessages.size > maxTranscriptions) {
+        const entries = Array.from(transcriptionMessages.entries());
+        const toRemove = entries.slice(0, entries.length - maxTranscriptions);
         
-        // Clear translation as this is only original
-        const translatedText = partialDiv.querySelector('.text-block:last-child .text-content');
-        translatedText.textContent = 'Translation pending...';
+        toRemove.forEach(([id, div]) => {
+            div.remove();
+            transcriptionMessages.delete(id);
+        });
     }
 }
 
 // Create message element
-function createMessageElement(data, isPartial) {
+function createMessageElement(data) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${data.role} ${isPartial ? 'partial' : ''}`;
+    messageDiv.className = `message ${data.role} partial`;
     
     const messageHeader = document.createElement('div');
     messageHeader.className = 'message-header';

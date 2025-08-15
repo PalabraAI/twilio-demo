@@ -38,13 +38,13 @@ client_settings = {
             },
         ],
     },
-    "translation_queue_configs": {
-        "global": {
-            "desired_queue_level_ms": 10000,
-            "max_queue_level_ms": 24000,
-            "auto_tempo": True,
-            "min_tempo": 1.0,
-            "max_tempo": 1.2,
+    'translation_queue_configs': {
+        'global': {
+            'desired_queue_level_ms': 10000,
+            'max_queue_level_ms': 24000,
+            'auto_tempo': True,
+            'min_tempo': 1.0,
+            'max_tempo': 1.2,
         },
     },
 }
