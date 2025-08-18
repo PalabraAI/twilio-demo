@@ -19,8 +19,8 @@ client_settings = {
     'pipeline': {
         'preprocessing': {},
         'transcription': {
-            'source_language': 'en',
-            'detectable_languages': ['ru', 'en'],
+            'source_language': os.getenv('SOURCE_LANGUAGE'),
+            'detectable_languages': ['ru', 'en', 'de', 'es', 'tr'],
             'asr_model': 'auto',
             'segment_confirmation_silence_threshold': 0.7,
             'sentence_splitter': {
@@ -33,7 +33,7 @@ client_settings = {
         },
         'translations': [
             {
-                'target_language': 'ru',
+                'target_language': os.getenv('TARGET_LANGUAGE'),
                 'translate_partial_transcriptions': False,
             },
         ],
@@ -49,8 +49,8 @@ client_settings = {
     },
 }
 operator_settings = copy.deepcopy(client_settings)
-operator_settings['pipeline']['translations'][0]['target_language'] = 'en'
-operator_settings['pipeline']['transcription']['source_language'] = 'ru'
+operator_settings['pipeline']['translations'][0]['target_language'] = os.getenv('SOURCE_LANGUAGE')
+operator_settings['pipeline']['transcription']['source_language'] = os.getenv('TARGET_LANGUAGE')
 role_settings = {
     'client': client_settings,
     'operator': operator_settings,

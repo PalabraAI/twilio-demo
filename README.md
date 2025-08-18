@@ -72,9 +72,16 @@ A real-time audio translation application built with FastAPI, Twilio, and Palabr
    pip install -e .
    ```
 
-## ⚙️ Configuration (TODO: specify more details)
+4. **Install development dependencies (optional)**
+   ```bash
+   pip install -e ".[lint]"
+   ```
 
-Create a `.env` file with the following variables:
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root directory with the following variables:
 
 ```env
 # Twilio Configuration
@@ -89,17 +96,105 @@ PALABRA_CLIENT_SECRET=your_client_secret
 # Server Configuration
 HOST=your_server_hostname_or_ip
 OPERATOR_NUMBER=operator_phone_number
+PORT=7839
+
+# Language Configuration
+SOURCE_LANGUAGE=en
+TARGET_LANGUAGE=ru
 ```
+
+### Variable Descriptions
+
+#### Twilio Configuration
+- **`TWILIO_ACCOUNT_SID`** - Your Twilio Account SID
+- **`TWILIO_AUTH_TOKEN`** - Your Twilio Auth Token
+- **`TWILIO_NUMBER`** - Your Twilio phone number that clients will call
+
+This Twilio [article](https://help.twilio.com/articles/14726256820123-What-is-a-Twilio-Account-SID-and-where-can-I-find-it-#h_01J7NVD4HY13NYHMVW1X4TFY7B) explains how to obtain both credentials.
+
+#### Palabra AI Configuration
+- **`PALABRA_CLIENT_ID`** - Your Palabra AI client identifier
+- **`PALABRA_CLIENT_SECRET`** - Your Palabra AI client secret key
+
+This Palabra [article](https://docs.palabra.ai/docs/auth/obtaining_api_keys) explains how to obtain both credentials.
+
+#### Server Configuration
+- **`HOST`** - Your server's hostname or IP address (for local development you may use Cloudflare Tunnel URL or its alternatives)
+- **`OPERATOR_NUMBER`** - The operator's phone number for receiving calls
+- **`PORT`** - Server port number (defaults to 7839)
+
+#### Language Configuration
+- **`SOURCE_LANGUAGE`** - Language spoken by the client (e.g., en, ru, de, es)
+- **`TARGET_LANGUAGE`** - Language spoken by the operator (e.g., en, ru, de, es)
+
+## 🌐 Local Development with Cloudflare Tunnel
+
+For local development, you'll need to expose your local server to the internet so Twilio can send webhooks. The recommended tool for this is **Cloudflare Tunnel** (cloudflared).
+
+### Setting up Cloudflare Tunnel
+
+1. **Install cloudflared**
+   Follow the [Cloudflare Tunnel documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/) for installation instructions.
+
+2. **Start cloudflared tunnel**
+   ```bash
+   cloudflared tunnel --url http://localhost:${PORT}
+   ```
+
+3. **Copy the tunnel URL**
+   ```
+   https://abc123.trycloudflare.com
+   ```
+
+4. **Set HOST variable**
+   Use the tunnel URL (without protocol) as your `HOST` value:
+   ```env
+   HOST=abc123.trycloudflare.com
+   ```
+
+### Important Notes
+
+- **HTTPS Required**: Twilio requires HTTPS for webhooks, which Cloudflare Tunnel provides
+- **Stable URLs**: Cloudflare Tunnel provides stable URLs that don't change on restart
+- **Update Twilio Webhooks**: Remember to update your Twilio webhook URLs when the tunnel URL changes
+
+
+### Twilio Webhook Configuration
+
+After setting up your tunnel, you need to configure Twilio webhooks to point to your server:
+
+1. **Go to Twilio Console** → **Phone Numbers** → **Manage** → **Active numbers**
+2. **Click on your phone number**
+3. **In the "Voice Configuration" section, set:**
+   - **Webhook URL**: `https://${HOST}/twiml/client`
+   - **HTTP Method**: `POST`
+
+For detailed instructions, see the [Twilio Phone Number Configuration documentation](https://support.twilio.com/hc/en-us/articles/223179948-Configure-Phone-Numbers-for-Voice-and-SMS).
+
+**Important**: Replace `${HOST}` with your actual tunnel hostname (e.g., `abc123.trycloudflare.com`).
+
+### Geographic Permissions
+
+**Critical**: Ensure that the country of your operator's phone number is enabled in Twilio's Geographic Permissions. If the operator's country is not enabled, Twilio will block outbound calls to that number.
+
+To configure Geographic Permissions:
+1. Go to **Twilio Console** → **Voice** → **Geographic Permissions**
+2. Enable calling to the country where your operator's phone number is located
+
+For detailed information about Geographic Permissions and toll fraud protection, see the [Twilio Geographic Permissions documentation](https://www.twilio.com/docs/sip-trunking/voice-dialing-geographic-permissions#allow-legitimate-calls-block-unwanted-calls-on-programmable-voice-and-elastic-sip-trunking).
 
 ## 🚀 Usage
 
 ### Starting the Server
 
 ```bash
+source .env
 python main.py
 ```
 
-The server will start on `http://0.0.0.0:7839`
+The server will start on `http://0.0.0.0:${PORT}`
+
+**Note**: Make sure you have created the `.env` file with all required environment variables before starting the server.
 
 ### Making a Call
 
@@ -112,8 +207,10 @@ The server will start on `http://0.0.0.0:7839`
 
 Access the transcription interface at:
 ```
-http://your-server:7839/transcription
+https://${HOST}:${PORT}/transcription
 ```
+
+Replace `${HOST}` and `${PORT}` with your actual server hostname/IP address and port number.
 
 ## 📁 Project Structure
 
@@ -248,5 +345,5 @@ The application provides detailed logging:
 
 Once the server is running, access the interactive API documentation at:
 ```
-http://your-server:your-port/demo/docs
+https://${HOST}:${PORT}/docs
 ```
