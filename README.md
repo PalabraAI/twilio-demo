@@ -49,7 +49,7 @@ A real-time audio translation application built with FastAPI, Twilio, and Palabr
 ## 📋 Prerequisites
 
 - Python 3.11 or higher
-- Twilio account with phone numbers
+- **Twilio paid account** with phone numbers (free trial accounts have limitations)
 - Palabra AI API credentials
 - Environment variables configured
 
@@ -61,46 +61,41 @@ A real-time audio translation application built with FastAPI, Twilio, and Palabr
    cd twilio-demo
    ```
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   ```
+2. **Configure environment variables**
+   Edit the `Makefile` and set your actual values for:
+   - Twilio credentials
+   - Palabra AI credentials
+   - Server configuration
+   - Language settings
 
 3. **Install dependencies**
    ```bash
-   pip install -e .
+   make install
    ```
 
 4. **Install development dependencies (optional)**
    ```bash
-   pip install -e ".[lint]"
+   make dev
    ```
 
 ## ⚙️ Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the project root directory with the following variables:
+All environment variables are configured in the `Makefile`. Edit the variables in the Makefile according to your setup:
 
-```env
-# Twilio Configuration
-TWILIO_ACCOUNT_SID=your_account_sid
-TWILIO_AUTH_TOKEN=your_auth_token
-TWILIO_NUMBER=your_twilio_phone_number
-
-# Palabra AI Configuration
-PALABRA_CLIENT_ID=your_client_id
-PALABRA_CLIENT_SECRET=your_client_secret
-
-# Server Configuration
-HOST=your_server_hostname_or_ip
-OPERATOR_NUMBER=operator_phone_number
-PORT=7839
-
-# Language Configuration
-SOURCE_LANGUAGE=en
-TARGET_LANGUAGE=ru
+```makefile
+# Environment variables
+export TWILIO_ACCOUNT_SID = your_account_sid
+export TWILIO_AUTH_TOKEN = your_auth_token
+export TWILIO_NUMBER = your_twilio_phone_number
+export PALABRA_CLIENT_ID = your_client_id
+export PALABRA_CLIENT_SECRET = your_client_secret
+export HOST = your_server_hostname_or_ip
+export OPERATOR_NUMBER = operator_phone_number
+export PORT = 7839
+export SOURCE_LANGUAGE = en
+export TARGET_LANGUAGE = pl
 ```
 
 ### Variable Descriptions
@@ -126,6 +121,24 @@ This Palabra [article](https://docs.palabra.ai/docs/auth/obtaining_api_keys) exp
 #### Language Configuration
 - **`SOURCE_LANGUAGE`** - Language spoken by the client (e.g., en, ru, de, es)
 - **`TARGET_LANGUAGE`** - Language spoken by the operator (e.g., en, ru, de, es)
+
+## 🛠️ Makefile Commands
+
+The project includes a `Makefile` for common operations:
+
+### **Available Commands**
+
+- **`make help`** - Show all available commands
+- **`make install`** - Create virtual environment and install dependencies
+- **`make dev`** - Install dependencies with development tools
+- **`make run`** - Start the server with environment variables from Makefile
+- **`make clean`** - Remove virtual environment
+- **`make format`** - Format code with black and isort
+- **`make check`** - Run all code quality checks
+
+### **Environment Variables in Makefile**
+
+All environment variables are defined in the `Makefile` using `export` statements. This ensures they are available when running `make run` or other commands.
 
 ## 🌐 Local Development with Cloudflare Tunnel
 
@@ -188,13 +201,12 @@ For detailed information about Geographic Permissions and toll fraud protection,
 ### Starting the Server
 
 ```bash
-source .env
-python main.py
+make run
 ```
 
 The server will start on `http://0.0.0.0:${PORT}`
 
-**Note**: Make sure you have created the `.env` file with all required environment variables before starting the server.
+**Note**: Make sure you have configured all environment variables in the `Makefile` before starting the server.
 
 ### Making a Call
 

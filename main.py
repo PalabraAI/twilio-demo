@@ -227,7 +227,7 @@ def main():
         app,
         host='0.0.0.0',
         loop='uvloop',
-        port=os.getenv('PORT'),
+        port=int(os.getenv('PORT')),
     )
 
 
