@@ -102,8 +102,11 @@ class AudioBridge:
                     audio_data = base64.b64decode(audio_data)
                     buffer += audio_data
 
-                    audio_data = convert_mulaw_to_pcm(audio_data)
-                    self.original_audio_queue.put_nowait(audio_data)
+                    converted_audio_data = convert_mulaw_to_pcm(audio_data)
+                    if self.role == 'client':
+                        self.original_audio_queue.put_nowait(audio_data)
+                    else:
+                        self.original_audio_queue.put_nowait(converted_audio_data)
 
                     if len(buffer) >= buffer_size:
                         chunk = buffer[:buffer_size]
@@ -163,7 +166,7 @@ class AudioBridge:
                 msg_type = data.get('message_type')
                 if msg_type == 'current_task':
                     logger.info('Task confirmed')
-                elif msg_type == 'output_audio_data':
+                elif msg_type == 'output_audio_data' and self.role == 'operator':
                     # Handle TTS audio
                     transcription_data = data.get('data', {})
                     audio_b64 = transcription_data.get('data', '')
@@ -210,14 +213,17 @@ class AudioBridge:
                 except asyncio.QueueEmpty:
                     translated_chunk = None
 
-                audio_data = await self.app.process_managers['mixer'].submit(
-                    {
-                        'chunk1': original_chunk,
-                        'chunk2': translated_chunk,
-                        'vol_a': 0.3,
-                        'vol_b': 0.7,
-                    }
-                )
+                if self.role == 'operator':
+                    audio_data = await self.app.process_managers['mixer'].submit(
+                        {
+                            'chunk1': original_chunk,
+                            'chunk2': translated_chunk,
+                            'vol_a': 0.3,
+                            'vol_b': 0.7,
+                        }
+                    )
+                else:
+                    audio_data = original_chunk
 
                 audio_payload = base64.b64encode(audio_data).decode('utf-8')
                 stream_sid = (
